@@ -12,6 +12,28 @@
 const $ = (selector) => document.querySelector(selector);
 // ex)  document.querySelector("#espresso-menu-form") ->  $("#espresso-menu-form")
 function App() {
+  // TODO 메뉴 수정
+  // [o]- 메뉴의 수정 버튼클릭 이벤트를 받고, 메뉴를 수정하는 모달창(prompt)이 뜬다.
+  // [o]- 모달창에서 신규메뉴명을 입력 받고, 확인버튼을 누르면 메뉴가 수정된다.
+  $("#espresso-menu-list").addEventListener("click", (e) => {
+    // 이벤트 타겟이 가지고 있는 클래스중에 menu-edit-button클래스가 포함되면
+    if (e.target.classList.contains("menu-edit-button")) {
+      // 수정버튼을 누른 경우만!
+
+      // 타겟에 가장 가까운 부모 ".closest("li")" 로 가서
+      // 그 안에있는 클래스 ".querySelector(".menu-name")"를 선택하는 방법
+      const $menuName = e.target.closest("li").querySelector(".menu-name");
+
+      //.innerText -> 텍스트로 가져옴
+      const updatedMenuName = prompt(
+        "메뉴명을 수정하세요",
+        $menuName.innerText
+      );
+      // prompt가 바뀐값을 리턴한다.
+      $menuName.innerText = updatedMenuName;
+    }
+  });
+
   // form태그가 자동으로 전송되는걸 막아준다.
   // -> form태그 때문에 엔터키 입력시 자동으로 새로고침 되기 때문
   $("#espresso-menu-form").addEventListener("submit", (e) => {
@@ -48,7 +70,7 @@ function App() {
     };
     // 템플릿을 HTML 안에 넣어주기 -> 여기까지만 하면 값이 대체되고 리스트가 추가가 안됌
     //   $("#espresso-menu-list").innerHTML = menuItemTemplate(espressoMenuName);
-    console.log(menuItemTemplate(espressoMenuName));
+    // console.log(menuItemTemplate(espressoMenuName));
     // 해결방안(참조) -> https://developer.mozilla.org/ko/docs/Web/API/Element/insertAdjacentHTML
     // Element.insertAdjacentHTML()
     // <!-- beforebegin -->
@@ -89,10 +111,6 @@ function App() {
   });
 }
 App();
-
-// TODO 메뉴 수정
-// []- 메뉴의 수정 버튼클릭 이벤트를 받고, 메뉴이름을 업데이트한다.
-// []- 모달창에서 신규메뉴명을 입력 받고, 확인버튼을 누르면 메뉴가 수정된다.
 
 // TODO 메뉴 삭제
 // []- 메뉴 삭제 버튼 클릭 이벤트를 받고, 메뉴삭제 컨펌 모달창이 뜬다.
