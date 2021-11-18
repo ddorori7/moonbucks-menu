@@ -5,6 +5,14 @@ const $ = (selector) => document.querySelector(selector);
 // ex)  document.querySelector("#espresso-menu-form") ->  $("#espresso-menu-form")
 function App() {
   // 이벤트 위임 -> https://blog.makerjun.com/5326e691-16cf-43f9-8908-00cc586f0884
+
+  const updateMenuCount = () => {
+    // 메뉴아이템 갯수 반영 -> CLASS참조 ".클래스이름"
+    // li태그가 몇개있는지 세기로 -> querySelectorAll("li") 태그 전부 세기
+    const menuCount = $("#espresso-menu-list").querySelectorAll("li").length;
+    $(".menu-count").innerText = `총 ${menuCount}개`;
+  };
+
   $("#espresso-menu-list").addEventListener("click", (e) => {
     // TODO 메뉴 수정
     // [o]- 메뉴의 수정 버튼클릭 이벤트를 받고, 메뉴를 수정하는 모달창(prompt)이 뜬다.
@@ -24,6 +32,20 @@ function App() {
       );
       // prompt가 바뀐값을 리턴한다.
       $menuName.innerText = updatedMenuName;
+    }
+
+    // TODO 메뉴 삭제
+    // [o]- 메뉴 삭제 버튼 클릭 이벤트를 받고, 메뉴삭제 컨펌(confirm) 모달창이 뜬다.
+    // [o]- 확인 버튼을 클릭하면 메뉴가 삭제된다.
+    // [o]- 총 메뉴 갯수를 count하여 상단에 보여준다.
+    if (e.target.classList.contains("menu-remove-button")) {
+      // 삭제버튼을 누른 경우만!
+      if (confirm("정말 삭제하시겠습니까?")) {
+        // e.target.closest("li") ->  li태그 안의 전부를 가져옴
+        // console.log(e.target.closest("li"));
+        e.target.closest("li").remove(); // 삭제
+        updateMenuCount(); // 총 갯수 카운터에 반영
+      }
     }
   });
 
@@ -86,10 +108,7 @@ function App() {
       "beforeend",
       menuItemTemplate(espressoMenuName)
     );
-    // 메뉴아이템 갯수 반영 -> CLASS참조 ".클래스이름"
-    // li태그가 몇개있는지 세기로 -> querySelectorAll("li") 태그 전부 세기
-    const menuCount = $("#espresso-menu-list").querySelectorAll("li").length;
-    $(".menu-count").innerText = `총 ${menuCount}개`;
+    updateMenuCount();
     // 메뉴가 추가되고 나면, input은 빈 값으로 초기화한다.
     $("#espresso-menu-name").value = "";
   };
@@ -110,10 +129,5 @@ function App() {
     }
     addMenuName();
   });
-
-  // TODO 메뉴 삭제
-  // []- 메뉴 삭제 버튼 클릭 이벤트를 받고, 메뉴삭제 컨펌 모달창이 뜬다.
-  // []- 확인 버튼을 클릭하면 메뉴가 삭제된다.
-  // []- 총 메뉴 갯수를 count하여 상단에 보여준다.
 }
 App();
