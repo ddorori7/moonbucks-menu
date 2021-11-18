@@ -56,22 +56,8 @@ localStorage.getItem("menu") -> 로컬스토리지에서 데이터 가져오기(
 // [ ] 품절 버튼을 클릭하면 localStorage에 상태값이 저장도니다.
 // [ ] 클릭이벤트에서 가장가까운 li태그의 class속성 값에 sold-out 을 추가한다.
 
-// 코드를 간결하게 쓰기위해 선언해줌
-const $ = (selector) => document.querySelector(selector);
-// ex)  document.querySelector("#espresso-menu-form") ->  $("#espresso-menu-form")
-
-// 로컬스토리지 관리
-const store = {
-  setLocalStorage(menu) {
-    localStorage.setItem("menu", JSON.stringify(menu));
-    // 문자열로만 저장이 되어야해서 JSON.stringify(menu)를 활용
-  },
-  getLocalStorage() {
-    return JSON.parse(localStorage.getItem("menu"));
-    // 문자를 다시 JSON객체로 저장
-  },
-};
-// 로컬스토리지 확인하는 방법 -> 개발자도구 - 애플리케이션 - 로컬스토리지
+import { $ } from "./utils/dom.js";
+import store from "./store/index.js";
 
 function App() {
   // 상태는 변하는 데이터, 이 앱에서 변하는 것이 무엇인가 - 메뉴명
@@ -90,6 +76,7 @@ function App() {
       this.menu = store.getLocalStorage();
     }
     render();
+    initEventListeners();
   };
 
   const render = () => {
@@ -129,7 +116,7 @@ function App() {
   const updateMenuCount = () => {
     // 메뉴아이템 갯수 반영 -> CLASS참조 ".클래스이름"
     // li태그가 몇개있는지 세기로 -> querySelectorAll("li") 태그 전부 세기
-    const menuCount = $("#menu-list").querySelectorAll("li").length;
+    const menuCount = this.menu[this.currentCategory].length;
     $(".menu-count").innerText = `총 ${menuCount}개`;
   };
 
@@ -158,11 +145,10 @@ function App() {
     // 그 안에있는 클래스 ".querySelector(".menu-name")"를 선택하는 방법
     const $menuName = e.target.closest("li").querySelector(".menu-name");
     //.innerText -> 텍스트로 가져옴
-    const updatedMenuName = prompt("메뉴명을 수정하세요", $menuName.innerText);
+    const updatedMenuName = prompt("메뉴명을 수정하세요", $menuName.innerText); // prompt가 바뀐값을 리턴한다.
     this.menu[this.currentCategory][menuId].name = updatedMenuName;
     store.setLocalStorage(this.menu); // 로컬스토리지에 업데이트
-    // prompt가 바뀐값을 리턴한다.
-    $menuName.innerText = updatedMenuName;
+    render();
   };
 
   // 삭제기능 함수
@@ -171,9 +157,7 @@ function App() {
       const menuId = e.target.closest("li").dataset.menuId; // data-menu-id 속성에 접근(.dataset.menuId)
       this.menu[this.currentCategory].splice(menuId, 1); // 삭제
       store.setLocalStorage(this.menu); // 로컬스토리지에 업데이트
-      // TODO: 똑같이 했는데 왜 로컬스토리지에서는 삭제 안되고 가끔 다른게 삭제돼?
-      e.target.closest("li").remove(); // 삭제
-      updateMenuCount(); // 총 갯수 카운터에 반영
+      render();
     }
   };
 
@@ -186,60 +170,62 @@ function App() {
     render();
   };
 
-  // 이벤트 위임 -> https://blog.makerjun.com/5326e691-16cf-43f9-8908-00cc586f0884
-  $("#menu-list").addEventListener("click", (e) => {
-    if (e.target.classList.contains("menu-edit-button")) {
-      // 이벤트 타겟이 가지고 있는 클래스중에 menu-edit-button클래스가 포함되면
-      // 수정버튼을 누른 경우만!
-      updateMenuName(e); // e -> 이벤트 객체를 함수에 넘겨준다
-      return; // return을 붙이면 불필요한 아래의 연산을 할 필요가 없어진다(습관들이기)
-    }
+  // 이벤트 리스너 모음 함수
+  const initEventListeners = () => {
+    // 이벤트 위임 -> https://blog.makerjun.com/5326e691-16cf-43f9-8908-00cc586f0884
+    $("#menu-list").addEventListener("click", (e) => {
+      if (e.target.classList.contains("menu-edit-button")) {
+        // 이벤트 타겟이 가지고 있는 클래스중에 menu-edit-button클래스가 포함되면
+        // 수정버튼을 누른 경우만!
+        updateMenuName(e); // e -> 이벤트 객체를 함수에 넘겨준다
+        return; // return을 붙이면 불필요한 아래의 연산을 할 필요가 없어진다(습관들이기)
+      }
 
-    if (e.target.classList.contains("menu-remove-button")) {
-      // 삭제버튼을 누른 경우만!
-      removeMenuName(e);
-      return;
-    }
+      if (e.target.classList.contains("menu-remove-button")) {
+        // 삭제버튼을 누른 경우만!
+        removeMenuName(e);
+        return;
+      }
 
-    if (e.target.classList.contains("menu-sold-out-button")) {
-      soldOutMenu(e);
-      return;
-    }
-  });
+      if (e.target.classList.contains("menu-sold-out-button")) {
+        soldOutMenu(e);
+        return;
+      }
+    });
 
-  // form태그가 자동으로 전송되는걸 막아준다.
-  // -> form태그 때문에 엔터키 입력시 자동으로 새로고침 되기 때문
-  $("#menu-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-  });
+    // form태그가 자동으로 전송되는걸 막아준다.
+    // -> form태그 때문에 엔터키 입력시 자동으로 새로고침 되기 때문
+    $("#menu-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+    });
 
-  // 메뉴의 이름을 입력받는건 ID값 참조 "#아이디"
+    // 확인버튼 이벤트
+    $("#menu-submit-button").addEventListener("click", addMenuName);
 
-  // 확인버튼 이벤트
-  $("#menu-submit-button").addEventListener("click", addMenuName);
+    // 엔터키 이벤트
+    $("#menu-name").addEventListener("keypress", (e) => {
+      if (e.key !== "Enter") {
+        // enter키를 안눌렀을때 종료가되고
+        // enter키를 누르면 실행되고
+        return;
+      }
+      addMenuName();
+    });
 
-  // 엔터키 이벤트
-  $("#menu-name").addEventListener("keypress", (e) => {
-    if (e.key !== "Enter") {
-      // enter키를 안눌렀을때 종료가되고
-      // enter키를 누르면 실행되고
-      return;
-    }
-    addMenuName();
-  });
+    // 카테고리 메뉴 선택시 바뀌게
+    $("nav").addEventListener("click", (e) => {
+      const isCategoryButton =
+        e.target.classList.contains("cafe-category-name");
 
-  // 카테고리 메뉴 선택시 바뀌게
-  $("nav").addEventListener("click", (e) => {
-    const isCategoryButton = e.target.classList.contains("cafe-category-name");
-
-    if (isCategoryButton) {
-      // html 속성 가져오기 ->  data-category-name="속성값"
-      const categoryName = e.target.dataset.categoryName;
-      this.currentCategory = categoryName;
-      $("#category-title").innerText = `${e.target.innerText} 메뉴 관리`;
-      render();
-    }
-  });
+      if (isCategoryButton) {
+        // html 속성 가져오기 ->  data-category-name="속성값"
+        const categoryName = e.target.dataset.categoryName;
+        this.currentCategory = categoryName;
+        $("#category-title").innerText = `${e.target.innerText} 메뉴 관리`;
+        render();
+      }
+    });
+  };
 }
 const app = new App(); // new 를 안쓰면 this.menu의 this 가 윈도우가 된다
 app.init();
