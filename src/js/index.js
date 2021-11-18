@@ -59,10 +59,31 @@ localStorage.getItem("menu") -> 로컬스토리지에서 데이터 가져오기(
 import { $ } from "./utils/dom.js";
 import store from "./store/index.js";
 
+// step3 요구사항 - 서버와의 통신을 통해 메뉴 관리하기
+
+// TODO 서버 요청 부분
+// [O] 웹 서버를 띄운다
+// [] 서버에 새로운 메뉴가 추가될 수 있게 요청한다.
+// [] 서버에서 카테고리별 메뉴리스트를 불러온다.
+// [] 서버에 메뉴가 수정 될 수 있도록 요청한다.
+// [] 서버에 메뉴의 품절상태를 토글할 수 있도록 요청한다.
+// [] 서버에 메뉴가 삭제 될 수 있도록 요청한다.
+
+// TODO 리펙터링 부분
+// [ ] localStorage에 저장하는 로직은 지운다.
+// [ ] fetch 비동기 api를 사용하는 부분을 async await을 사용하여 구현한다.
+
+// TODO 사용자 경험
+// [ ] API 통신이 실패하는 경우에 대해 사용자가 알 수 있게 alert으로 예외처리를 진행한다.
+// [ ] 중복되는 메뉴는 추가할 수 없다.
+
+const BASE_URL = "http://localhost:3000/api";
+
 function App() {
   // 상태는 변하는 데이터, 이 앱에서 변하는 것이 무엇인가 - 메뉴명
   // 갯수는 업데이트만 되면 되지 메뉴명의 길이로 구하면 되서 관리할 대상 아님.
   this.menu = {
+    // 객체의 키값
     espresso: [],
     frappuccino: [],
     blended: [],
@@ -130,11 +151,21 @@ function App() {
     }
     // 인풋폼에 메뉴의 이름을 입력받고 추가한다.
     const menuName = $("#menu-name").value;
-    this.menu[this.currentCategory].push({ name: menuName }); // 상태 배열값에 메뉴 추가
-    store.setLocalStorage(this.menu); // 상태변화가 되었을때 데이터 저장
-    render();
+
+    // 서버에 요청
+    fetch(`${BASE_URL}/category/${this.currentCategory}/menu`, {
+      method: "POST", // 새로 생성되는 것은 POST로 약속
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: menuName }),
+    }).then((response) => {
+      console.log(response);
+    });
+
+    // this.menu[this.currentCategory].push({ name: menuName }); // 상태 배열값에 메뉴 추가
+    // store.setLocalStorage(this.menu); // 상태변화가 되었을때 데이터 저장
+    // render();
     // 메뉴가 추가되고 나면, input은 빈 값으로 초기화한다.
-    $("#menu-name").value = "";
+    // $("#menu-name").value = "";
   };
 
   // 수정기능 함수
