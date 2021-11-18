@@ -142,7 +142,7 @@ function App() {
   };
 
   // 두가지 이벤트에서 재사용할 수 있는 함수 만들기
-  const addMenuName = () => {
+  const addMenuName = async () => {
     // 사용자 입력값이 빈 값이라면 추가되지 않는다.
     if ($("#menu-name").value === "") {
       alert("값을 입력해주세요."); // 여기까지만 하면 뒷부분이 실행되서 빈값이 목록에 추가됌
@@ -152,20 +152,25 @@ function App() {
     // 인풋폼에 메뉴의 이름을 입력받고 추가한다.
     const menuName = $("#menu-name").value;
 
-    // 서버에 요청
-    fetch(`${BASE_URL}/category/${this.currentCategory}/menu`, {
+    // 서버에 요청 -> 데이터생성
+    await fetch(`${BASE_URL}/category/${this.currentCategory}/menu`, {
       method: "POST", // 새로 생성되는 것은 POST로 약속
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: menuName }),
     }).then((response) => {
-      console.log(response);
+      return response.json();
     });
 
-    // this.menu[this.currentCategory].push({ name: menuName }); // 상태 배열값에 메뉴 추가
-    // store.setLocalStorage(this.menu); // 상태변화가 되었을때 데이터 저장
-    // render();
-    // 메뉴가 추가되고 나면, input은 빈 값으로 초기화한다.
-    // $("#menu-name").value = "";
+    // 데이터 가져오기
+    await fetch(`${BASE_URL}/category/${this.currentCategory}/menu`)
+      .then((response) => {
+        return response.json();
+      })
+      .then((data) => {
+        this.menu[this.currentCategory] = data;
+        render();
+        $("#menu-name").value = "";
+      });
   };
 
   // 수정기능 함수
