@@ -4,64 +4,12 @@
 const $ = (selector) => document.querySelector(selector);
 // ex)  document.querySelector("#espresso-menu-form") ->  $("#espresso-menu-form")
 function App() {
-  // 이벤트 위임 -> https://blog.makerjun.com/5326e691-16cf-43f9-8908-00cc586f0884
-
   const updateMenuCount = () => {
     // 메뉴아이템 갯수 반영 -> CLASS참조 ".클래스이름"
     // li태그가 몇개있는지 세기로 -> querySelectorAll("li") 태그 전부 세기
     const menuCount = $("#espresso-menu-list").querySelectorAll("li").length;
     $(".menu-count").innerText = `총 ${menuCount}개`;
   };
-
-  $("#espresso-menu-list").addEventListener("click", (e) => {
-    // TODO 메뉴 수정
-    // [o]- 메뉴의 수정 버튼클릭 이벤트를 받고, 메뉴를 수정하는 모달창(prompt)이 뜬다.
-    // [o]- 모달창에서 신규메뉴명을 입력 받고, 확인버튼을 누르면 메뉴가 수정된다.
-    // 이벤트 타겟이 가지고 있는 클래스중에 menu-edit-button클래스가 포함되면
-    if (e.target.classList.contains("menu-edit-button")) {
-      // 수정버튼을 누른 경우만!
-
-      // 타겟에 가장 가까운 부모 ".closest("li")" 로 가서
-      // 그 안에있는 클래스 ".querySelector(".menu-name")"를 선택하는 방법
-      const $menuName = e.target.closest("li").querySelector(".menu-name");
-
-      //.innerText -> 텍스트로 가져옴
-      const updatedMenuName = prompt(
-        "메뉴명을 수정하세요",
-        $menuName.innerText
-      );
-      // prompt가 바뀐값을 리턴한다.
-      $menuName.innerText = updatedMenuName;
-    }
-
-    // TODO 메뉴 삭제
-    // [o]- 메뉴 삭제 버튼 클릭 이벤트를 받고, 메뉴삭제 컨펌(confirm) 모달창이 뜬다.
-    // [o]- 확인 버튼을 클릭하면 메뉴가 삭제된다.
-    // [o]- 총 메뉴 갯수를 count하여 상단에 보여준다.
-    if (e.target.classList.contains("menu-remove-button")) {
-      // 삭제버튼을 누른 경우만!
-      if (confirm("정말 삭제하시겠습니까?")) {
-        // e.target.closest("li") ->  li태그 안의 전부를 가져옴
-        // console.log(e.target.closest("li"));
-        e.target.closest("li").remove(); // 삭제
-        updateMenuCount(); // 총 갯수 카운터에 반영
-      }
-    }
-  });
-
-  // TODO 메뉴 추가
-  // [o]- 메뉴의 이름을 입력받고 엔터키 입력으로 추가한다.
-  // [o]- 메뉴의 이름을 입력받고 확인버튼을 클릭하면 추가한다.
-  // [o]- 추가되는 메뉴의 아래 마크업은 <ul id="espresso-menu-list" class="mt-3 pl-0"></ul> 안에 삽입해야 한다.
-  // [o]- 총 메뉴 갯수를 count하여 상단에 보여준다.
-  // [o]- 메뉴가 추가되고 나면, input은 빈 값으로 초기화한다.
-  // [o]- 사용자 입력값이 빈 값이라면 추가되지 않는다.
-
-  // form태그가 자동으로 전송되는걸 막아준다.
-  // -> form태그 때문에 엔터키 입력시 자동으로 새로고침 되기 때문
-  $("#espresso-menu-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-  });
 
   // 두가지 이벤트에서 재사용할 수 있는 함수 만들기
   const addMenuName = () => {
@@ -113,12 +61,68 @@ function App() {
     $("#espresso-menu-name").value = "";
   };
 
+  // 수정기능 함수
+  const updateMenuName = (e) => {
+    // e 객체를 받아서~
+    // 타겟에 가장 가까운 부모 ".closest("li")" 로 가서
+    // 그 안에있는 클래스 ".querySelector(".menu-name")"를 선택하는 방법
+    const $menuName = e.target.closest("li").querySelector(".menu-name");
+
+    //.innerText -> 텍스트로 가져옴
+    const updatedMenuName = prompt("메뉴명을 수정하세요", $menuName.innerText);
+    // prompt가 바뀐값을 리턴한다.
+    $menuName.innerText = updatedMenuName;
+  };
+
+  // 삭제기능 함수
+  const removeMenuName = (e) => {
+    if (confirm("정말 삭제하시겠습니까?")) {
+      // e.target.closest("li") ->  li태그 안의 전부를 가져옴
+      // console.log(e.target.closest("li"));
+      e.target.closest("li").remove(); // 삭제
+      updateMenuCount(); // 총 갯수 카운터에 반영
+    }
+  };
+
+  $("#espresso-menu-list").addEventListener("click", (e) => {
+    // 이벤트 위임 -> https://blog.makerjun.com/5326e691-16cf-43f9-8908-00cc586f0884
+    // TODO 메뉴 수정
+    // [o]- 메뉴의 수정 버튼클릭 이벤트를 받고, 메뉴를 수정하는 모달창(prompt)이 뜬다.
+    // [o]- 모달창에서 신규메뉴명을 입력 받고, 확인버튼을 누르면 메뉴가 수정된다.
+    // 이벤트 타겟이 가지고 있는 클래스중에 menu-edit-button클래스가 포함되면
+    if (e.target.classList.contains("menu-edit-button")) {
+      // 수정버튼을 누른 경우만!
+      updateMenuName(e); // e -> 이벤트 객체를 함수에 넘겨준다
+    }
+
+    // TODO 메뉴 삭제
+    // [o]- 메뉴 삭제 버튼 클릭 이벤트를 받고, 메뉴삭제 컨펌(confirm) 모달창이 뜬다.
+    // [o]- 확인 버튼을 클릭하면 메뉴가 삭제된다.
+    // [o]- 총 메뉴 갯수를 count하여 상단에 보여준다.
+    if (e.target.classList.contains("menu-remove-button")) {
+      // 삭제버튼을 누른 경우만!
+      removeMenuName(e);
+    }
+  });
+
+  // TODO 메뉴 추가
+  // [o]- 메뉴의 이름을 입력받고 엔터키 입력으로 추가한다.
+  // [o]- 메뉴의 이름을 입력받고 확인버튼을 클릭하면 추가한다.
+  // [o]- 추가되는 메뉴의 아래 마크업은 <ul id="espresso-menu-list" class="mt-3 pl-0"></ul> 안에 삽입해야 한다.
+  // [o]- 총 메뉴 갯수를 count하여 상단에 보여준다.
+  // [o]- 메뉴가 추가되고 나면, input은 빈 값으로 초기화한다.
+  // [o]- 사용자 입력값이 빈 값이라면 추가되지 않는다.
+
+  // form태그가 자동으로 전송되는걸 막아준다.
+  // -> form태그 때문에 엔터키 입력시 자동으로 새로고침 되기 때문
+  $("#espresso-menu-form").addEventListener("submit", (e) => {
+    e.preventDefault();
+  });
+
   // 메뉴의 이름을 입력받는건 ID값 참조 "#아이디"
 
   // 확인버튼 이벤트
-  $("#espresso-menu-submit-button").addEventListener("click", (e) => {
-    addMenuName();
-  });
+  $("#espresso-menu-submit-button").addEventListener("click", addMenuName);
 
   // 엔터키 이벤트
   $("#espresso-menu-name").addEventListener("keypress", (e) => {
