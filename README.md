@@ -105,6 +105,14 @@
 
 ## 🎯 step3 요구사항 - 서버와의 통신을 통해 메뉴 관리하기
 
+### 서버 실행하기 -> cmd 창에 입력
+
+```
+cd moonbucks-menu-server
+
+npm start
+```
+
 - [ ] [링크](https://github.com/blackcoffee-study/moonbucks-menu-server)에 있는 웹 서버 저장소를 clone하여 로컬에서 웹 서버를 실행시킨다.
 - [ ] 웹 서버를 띄워서 실제 서버에 데이터의 변경을 저장하는 형태로 리팩터링한다.
   - [ ] localStorage에 저장하는 로직은 지운다.
